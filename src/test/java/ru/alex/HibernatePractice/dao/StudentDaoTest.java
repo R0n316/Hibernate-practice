@@ -88,7 +88,7 @@ class StudentDaoTest {
             assertThat(maybeStudent).isPresent();
             Student student = maybeStudent.get();
             student.setEmail("newEmail@new.email");
-            session.persist(student);
+            studentDao.update(session,student);
             session.flush();
 
             Student updatedStudent = studentDao.get(session,IVAN.getId()).get();
