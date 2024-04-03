@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface Dao<T,K> {
-    Optional<T> get(Session session,K k);
+    Optional<T> get(Session session,K id);
 
     List<T> getAll(Session session);
 
-    void save(Session session,T t);
+    void save(Session session,T id);
 
-    void update(Session session,T t);
+    void update(Session session,T id);
 
-    void delete(Session session,T t);
+    void delete(Session session,T id);
 }

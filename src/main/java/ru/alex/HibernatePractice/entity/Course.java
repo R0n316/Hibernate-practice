@@ -23,6 +23,6 @@ public class Course {
 
     private int duration;
 
-    @OneToMany(mappedBy = "course")
+    @OneToMany(mappedBy = "course",cascade = CascadeType.REMOVE)
     private List<Enrollment> enrollments;
 }
