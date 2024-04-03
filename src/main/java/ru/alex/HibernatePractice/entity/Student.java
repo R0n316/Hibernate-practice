@@ -9,13 +9,14 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(of = "email")
-@EqualsAndHashCode(exclude = "enrollments")
+@ToString(exclude = "enrollments")
+@EqualsAndHashCode(of = "email")
 @Builder
 @Entity
 public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Integer id;
 
     private String name;
@@ -29,6 +30,6 @@ public class Student {
 
     private float grade;
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(mappedBy = "student",cascade = CascadeType.REMOVE)
     private List<Enrollment> enrollments;
 }

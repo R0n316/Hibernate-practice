@@ -1,0 +1,21 @@
+package ru.alex.HibernatePractice.util;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.testcontainers.containers.PostgreSQLContainer;
+
+public class HibernateTestUtil {
+    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16");
+
+    static {
+        postgres.start();
+    }
+
+    public static SessionFactory buildSessionFactory(){
+        Configuration configuration = HibernateUtil.buildConfiguration();
+        configuration.setProperty("hibernate.connection.url",postgres.getJdbcUrl());
+        configuration.setProperty("hibernate.connection.username",postgres.getUsername());
+        configuration.setProperty("hibernate.connection.password",postgres.getPassword());
+        return configuration.buildSessionFactory();
+    }
+}
