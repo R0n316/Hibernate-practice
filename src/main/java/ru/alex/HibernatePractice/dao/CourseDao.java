@@ -32,4 +32,11 @@ public class CourseDao implements Dao<Course,Integer>{
     public void delete(Session session, Course course) {
         session.remove(course);
     }
+
+    public List<Course> findCoursesByStudent(Session session, Integer studentId){
+        return session.createQuery(
+                "SELECT DISTINCT c FROM Course c JOIN c.enrollments e WHERE e.student.id=:studentId",Course.class)
+                .setParameter("studentId",studentId)
+                .list();
+    }
 }

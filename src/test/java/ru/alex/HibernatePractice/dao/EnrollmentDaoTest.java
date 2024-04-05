@@ -76,7 +76,22 @@ class EnrollmentDaoTest {
 
     @Test
     void save() {
+        try(Session session = sessionFactory.openSession()){
+            session.beginTransaction();
+            Enrollment enrollment = Enrollment.builder()
+                    .student(IVAN)
+                    .course(MATH)
+                    .build();
+            enrollmentDao.save(session,enrollment);
 
+            session.flush();
+
+            enrollment.setId(7);
+            Optional<Enrollment> maybeEnrollment = enrollmentDao.get(session,enrollment.getId());
+            assertThat(maybeEnrollment).isPresent();
+            assertThat(maybeEnrollment.get()).isEqualTo(enrollment);
+            session.getTransaction().commit();
+        }
     }
 
     @Test
@@ -142,4 +157,10 @@ class EnrollmentDaoTest {
         }
     }
 
+    @Test
+    void giveStudentGradeForCourse(){
+        try(Session session = sessionFactory.openSession()){
+
+        }
+    }
 }

@@ -21,6 +21,9 @@ public class Enrollment {
     @CreationTimestamp
     private LocalDate enrollmentDate;
 
+    @Column(name = "course_grade")
+    private Float courseGrade;
+
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "student_id",referencedColumnName = "id")
     private Student student;

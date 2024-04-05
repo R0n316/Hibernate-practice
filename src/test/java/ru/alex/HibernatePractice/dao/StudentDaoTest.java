@@ -4,6 +4,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.alex.HibernatePractice.entity.Course;
 import ru.alex.HibernatePractice.entity.Student;
 import ru.alex.HibernatePractice.util.TestDataImporter;
 import ru.alex.HibernatePractice.util.HibernateTestUtil;
@@ -16,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class StudentDaoTest {
 
-    private static final SessionFactory sessionFactory = HibernateTestUtil.buildSessionFactory();
+    private SessionFactory sessionFactory;
 
     private final StudentDao studentDao = new StudentDao();
 
@@ -31,7 +32,8 @@ class StudentDaoTest {
 
 
     @BeforeEach
-    public void initData(){
+    public void setUp(){
+        sessionFactory = HibernateTestUtil.buildSessionFactory();
         TestDataImporter.initData(sessionFactory);
     }
 
@@ -68,7 +70,7 @@ class StudentDaoTest {
                 .name("example")
                 .email("example@mail.com")
                 .surname("some surname")
-                .grade(5)
+                .grade(5F)
                 .build();
         try(Session session = sessionFactory.openSession()){
             session.beginTransaction();
@@ -114,6 +116,30 @@ class StudentDaoTest {
             assertThat(maybeStudent).isEmpty();
 
             session.getTransaction().commit();
+        }
+    }
+
+    @Test
+    void findStudentsByCourse(){
+        try(Session session = sessionFactory.openSession()){
+            session.beginTransaction();
+
+            Course math = Course.builder()
+                    .id(1)
+                    .name("Math")
+                    .duration(60)
+                    .build();
+
+            List<String> expectedEmails = List.of("ivan@gmail.com","jones@gmail.com");
+
+            List<Student> students = studentDao.finStudentsByCourse(session,math.getId());
+
+            List<String> actualEmails = students.stream().map(Student::getEmail).toList();
+
+            assertThat(actualEmails).isEqualTo(expectedEmails);
+
+            session.getTransaction().commit();
+
         }
     }
 }

@@ -5,9 +5,11 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.alex.HibernatePractice.entity.Course;
+import ru.alex.HibernatePractice.entity.Student;
 import ru.alex.HibernatePractice.util.TestDataImporter;
 import ru.alex.HibernatePractice.util.HibernateTestUtil;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CourseDaoTest {
 
-    private static final SessionFactory sessionFactory = HibernateTestUtil.buildSessionFactory();
+    private SessionFactory sessionFactory;
 
     private final CourseDao courseDao = new CourseDao();
 
@@ -37,9 +39,19 @@ class CourseDaoTest {
             .duration(40)
             .build();
 
+    Student PETR = Student.builder()
+            .id(2)
+            .name("Petr")
+            .surname("Petrov")
+            .email("pertov@gmail.com")
+            .birthDate(LocalDate.of(1995,3,4))
+            .grade(4.85F)
+            .build();
+
 
     @BeforeEach
-    public void init(){
+    public void setUp(){
+        sessionFactory = HibernateTestUtil.buildSessionFactory();
         TestDataImporter.initData(sessionFactory);
     }
 
@@ -109,6 +121,24 @@ class CourseDaoTest {
 
             Optional<Course> maybeCourse = courseDao.get(session,MATH.getId());
             assertThat(maybeCourse).isEmpty();
+
+            session.getTransaction().commit();
+        }
+    }
+
+    @Test
+    void findCoursesByStudent(){
+        try(Session session = sessionFactory.openSession()){
+            session.beginTransaction();
+
+            List<String> expectedCourseNames = List.of("history");
+
+
+            List<Course> courses = courseDao.findCoursesByStudent(session,PETR.getId());
+
+            List<String> actualCourseNames = courses.stream().map(Course::getName).toList();
+
+            assertThat(actualCourseNames).isEqualTo(expectedCourseNames);
 
             session.getTransaction().commit();
         }

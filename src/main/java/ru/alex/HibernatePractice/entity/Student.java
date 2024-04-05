@@ -28,7 +28,7 @@ public class Student {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    private float grade;
+    private Float grade;
 
     @OneToMany(mappedBy = "student",cascade = CascadeType.REMOVE)
     private List<Enrollment> enrollments;

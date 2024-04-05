@@ -21,7 +21,9 @@ public class Course {
 
     private String description;
 
-    private int duration;
+    private Integer duration;
+
+
 
     @OneToMany(mappedBy = "course",cascade = CascadeType.REMOVE)
     private List<Enrollment> enrollments;
