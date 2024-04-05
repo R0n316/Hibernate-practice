@@ -1,10 +1,8 @@
 package ru.alex.HibernatePractice.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 
@@ -13,19 +11,21 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 @Entity
+@EqualsAndHashCode(exclude = "enrollmentDate")
 public class Enrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "enrollment_date")
+    @CreationTimestamp
     private LocalDate enrollmentDate;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "student_id",referencedColumnName = "id")
     private Student student;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "course_id",referencedColumnName = "id")
     private Course course;
 }

@@ -10,7 +10,7 @@ import ru.alex.HibernatePractice.entity.Student;
 import java.time.LocalDate;
 
 @UtilityClass
-public class DataImporter {
+public class TestDataImporter {
     public void initData(SessionFactory sessionFactory){
         try(Session session = sessionFactory.openSession()){
             session.beginTransaction();

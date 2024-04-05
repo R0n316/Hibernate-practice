@@ -10,9 +10,9 @@ public interface Dao<T,K> {
 
     List<T> getAll(Session session);
 
-    void save(Session session,T id);
+    void save(Session session,T t);
 
-    void update(Session session,T id);
+    void update(Session session,T t);
 
-    void delete(Session session,T id);
+    void delete(Session session,T t);
 }

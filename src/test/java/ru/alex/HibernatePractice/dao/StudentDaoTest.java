@@ -5,7 +5,7 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.alex.HibernatePractice.entity.Student;
-import ru.alex.HibernatePractice.util.DataImporter;
+import ru.alex.HibernatePractice.util.TestDataImporter;
 import ru.alex.HibernatePractice.util.HibernateTestUtil;
 
 import java.time.LocalDate;
@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class StudentDaoTest {
 
-    private final SessionFactory sessionFactory = HibernateTestUtil.buildSessionFactory();
+    private static final SessionFactory sessionFactory = HibernateTestUtil.buildSessionFactory();
 
     private final StudentDao studentDao = new StudentDao();
 
@@ -32,7 +32,7 @@ class StudentDaoTest {
 
     @BeforeEach
     public void initData(){
-        DataImporter.initData(sessionFactory);
+        TestDataImporter.initData(sessionFactory);
     }
 
     @Test
