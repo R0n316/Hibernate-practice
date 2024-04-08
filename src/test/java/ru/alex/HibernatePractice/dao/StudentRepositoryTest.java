@@ -9,17 +9,18 @@ import ru.alex.HibernatePractice.entity.Student;
 import ru.alex.HibernatePractice.util.TestDataImporter;
 import ru.alex.HibernatePractice.util.HibernateTestUtil;
 
+import java.lang.reflect.Proxy;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class StudentDaoTest {
+class StudentRepositoryTest {
 
     private SessionFactory sessionFactory;
 
-    private final StudentDao studentDao = new StudentDao();
+    private StudentRepository studentRepository;
 
     private static final Student IVAN = Student.builder()
             .id(1)
@@ -39,9 +40,10 @@ class StudentDaoTest {
 
     @Test
     void get() {
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            studentRepository = new StudentRepository(session);
             session.beginTransaction();
-            Optional<Student> maybeIvan = studentDao.get(session,IVAN.getId());
+            Optional<Student> maybeIvan = studentRepository.get(IVAN.getId());
             assertThat(maybeIvan).isPresent();
             assertThat(maybeIvan.get()).isEqualTo(IVAN);
             session.getTransaction().commit();
@@ -56,9 +58,10 @@ class StudentDaoTest {
                 "jones@gmail.com"
         );
 
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            studentRepository = new StudentRepository(session);
             session.beginTransaction();
-            List<Student> students = studentDao.getAll(session);
+            List<Student> students = studentRepository.getAll();
             List<String> actualEmails = students.stream().map(Student::getEmail).toList();
             assertThat(actualEmails).isEqualTo(expectedEmails);
         }
@@ -72,11 +75,12 @@ class StudentDaoTest {
                 .surname("some surname")
                 .grade(5F)
                 .build();
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            studentRepository = new StudentRepository(session);
             session.beginTransaction();
-            studentDao.save(session,exampleStudent);
+            studentRepository.save(exampleStudent);
             session.flush();
-            Optional<Student> maybeStudent = studentDao.get(session,4);
+            Optional<Student> maybeStudent = studentRepository.get(4);
             assertThat(maybeStudent).isPresent();
             assertThat(maybeStudent.get()).isEqualTo(exampleStudent);
         }
@@ -84,16 +88,17 @@ class StudentDaoTest {
 
     @Test
     void update() {
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            studentRepository = new StudentRepository(session);
             session.beginTransaction();
-            Optional<Student> maybeStudent = studentDao.get(session,IVAN.getId());
+            Optional<Student> maybeStudent = studentRepository.get(IVAN.getId());
             assertThat(maybeStudent).isPresent();
             Student student = maybeStudent.get();
             student.setEmail("newEmail@new.email");
-            studentDao.update(session,student);
+            studentRepository.update(student);
             session.flush();
 
-            Student updatedStudent = studentDao.get(session,IVAN.getId()).get();
+            Student updatedStudent = studentRepository.get(IVAN.getId()).get();
 
             assertThat(updatedStudent).isNotEqualTo(IVAN);
 
@@ -103,15 +108,16 @@ class StudentDaoTest {
 
     @Test
     void delete() {
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            studentRepository = new StudentRepository(session);
             session.beginTransaction();
 
-            Optional<Student> student = studentDao.get(session,IVAN.getId());
+            Optional<Student> student = studentRepository.get(IVAN.getId());
             assertThat(student).isPresent();
 
-            studentDao.delete(session,student.get());
+            studentRepository.delete(student.get());
 
-            Optional<Student> maybeStudent = studentDao.get(session,IVAN.getId());
+            Optional<Student> maybeStudent = studentRepository.get(IVAN.getId());
 
             assertThat(maybeStudent).isEmpty();
 
@@ -121,7 +127,8 @@ class StudentDaoTest {
 
     @Test
     void findStudentsByCourse(){
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            studentRepository = new StudentRepository(session);
             session.beginTransaction();
 
             Course math = Course.builder()
@@ -132,7 +139,7 @@ class StudentDaoTest {
 
             List<String> expectedEmails = List.of("ivan@gmail.com","jones@gmail.com");
 
-            List<Student> students = studentDao.finStudentsByCourse(session,math.getId());
+            List<Student> students = studentRepository.finStudentsByCourse(session,math.getId());
 
             List<String> actualEmails = students.stream().map(Student::getEmail).toList();
 
@@ -141,5 +148,9 @@ class StudentDaoTest {
             session.getTransaction().commit();
 
         }
+    }
+    private Session buildSession(){
+        return (Session) Proxy.newProxyInstance(SessionFactory.class.getClassLoader(),new Class[]{Session.class},
+                ((proxy, method, args) -> method.invoke(sessionFactory.getCurrentSession(),args)));
     }
 }

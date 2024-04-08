@@ -9,17 +9,18 @@ import ru.alex.HibernatePractice.entity.Student;
 import ru.alex.HibernatePractice.util.TestDataImporter;
 import ru.alex.HibernatePractice.util.HibernateTestUtil;
 
+import java.lang.reflect.Proxy;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CourseDaoTest {
+class CourseRepositoryTest {
 
     private SessionFactory sessionFactory;
 
-    private final CourseDao courseDao = new CourseDao();
+    private CourseRepository courseRepository;
 
     private static final Course MATH = Course.builder()
             .id(1)
@@ -57,9 +58,10 @@ class CourseDaoTest {
 
     @Test
     void get() {
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            courseRepository = new CourseRepository(session);
             session.beginTransaction();
-            Optional<Course> course = courseDao.get(session,MATH.getId());
+            Optional<Course> course = courseRepository.get(MATH.getId());
             assertThat(course).isPresent();
             assertThat(course.get()).isEqualTo(MATH);
             session.getTransaction().commit();
@@ -68,9 +70,10 @@ class CourseDaoTest {
 
     @Test
     void getAll() {
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            courseRepository = new CourseRepository(session);
             session.beginTransaction();
-            List<Course> courses = courseDao.getAll(session);
+            List<Course> courses = courseRepository.getAll();
             assertThat(courses).contains(MATH,HISTORY,PHYSICS);
             session.getTransaction().commit();
         }
@@ -78,15 +81,16 @@ class CourseDaoTest {
 
     @Test
     void save() {
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            courseRepository = new CourseRepository(session);
             session.beginTransaction();
             Course newCourse = Course.builder()
                     .name("some name")
                     .duration(100)
                     .build();
-            courseDao.save(session,newCourse);
+            courseRepository.save(newCourse);
             newCourse.setId(4);
-            Optional<Course> course = courseDao.get(session,newCourse.getId());
+            Optional<Course> course = courseRepository.get(newCourse.getId());
             assertThat(course).isPresent();
             assertThat(course.get()).isEqualTo(newCourse);
             session.getTransaction().commit();
@@ -95,15 +99,16 @@ class CourseDaoTest {
 
     @Test
     void update() {
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            courseRepository = new CourseRepository(session);
             session.beginTransaction();
-            Optional<Course> maybeCourse = courseDao.get(session,MATH.getId());
+            Optional<Course> maybeCourse = courseRepository.get(MATH.getId());
             assertThat(maybeCourse).isPresent();
             Course course = maybeCourse.get();
             course.setDuration(course.getDuration() + 10);
-            courseDao.update(session,course);
+            courseRepository.update(course);
             session.flush();
-            Course updatedCourse = courseDao.get(session,course.getId()).get();
+            Course updatedCourse = courseRepository.get(course.getId()).get();
             assertThat(updatedCourse.getDuration()).isNotEqualTo(MATH.getDuration());
 
             session.getTransaction().commit();
@@ -112,14 +117,15 @@ class CourseDaoTest {
 
     @Test
     void delete() {
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            courseRepository = new CourseRepository(session);
             session.beginTransaction();
 
-            Optional<Course> course = courseDao.get(session,MATH.getId());
+            Optional<Course> course = courseRepository.get(MATH.getId());
             assertThat(course).isPresent();
-            courseDao.delete(session,course.get());
+            courseRepository.delete(course.get());
 
-            Optional<Course> maybeCourse = courseDao.get(session,MATH.getId());
+            Optional<Course> maybeCourse = courseRepository.get(MATH.getId());
             assertThat(maybeCourse).isEmpty();
 
             session.getTransaction().commit();
@@ -129,12 +135,13 @@ class CourseDaoTest {
     @Test
     void findCoursesByStudent(){
         try(Session session = sessionFactory.openSession()){
+            courseRepository = new CourseRepository(session);
             session.beginTransaction();
 
             List<String> expectedCourseNames = List.of("history");
 
 
-            List<Course> courses = courseDao.findCoursesByStudent(session,PETR.getId());
+            List<Course> courses = courseRepository.findCoursesByStudent(PETR.getId());
 
             List<String> actualCourseNames = courses.stream().map(Course::getName).toList();
 
@@ -142,5 +149,10 @@ class CourseDaoTest {
 
             session.getTransaction().commit();
         }
+    }
+
+    private Session buildSession(){
+        return (Session) Proxy.newProxyInstance(SessionFactory.class.getClassLoader(),new Class[]{Session.class},
+                ((proxy, method, args) -> method.invoke(sessionFactory.getCurrentSession(),args)));
     }
 }

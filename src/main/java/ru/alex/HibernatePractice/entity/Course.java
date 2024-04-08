@@ -12,7 +12,7 @@ import java.util.List;
 @EqualsAndHashCode(exclude = "enrollments")
 @Builder
 @Entity
-public class Course {
+public class Course implements BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

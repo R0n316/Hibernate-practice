@@ -11,6 +11,7 @@ import ru.alex.HibernatePractice.entity.Student;
 import ru.alex.HibernatePractice.util.TestDataImporter;
 import ru.alex.HibernatePractice.util.HibernateTestUtil;
 
+import java.lang.reflect.Proxy;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -19,11 +20,11 @@ import static org.assertj.core.api.Assertions.*;
 
 
 @TestInstance(TestInstance.Lifecycle.PER_METHOD)
-class EnrollmentDaoTest {
+class EnrollmentRepositoryTest {
 
     private SessionFactory sessionFactory;
 
-    private final EnrollmentDao enrollmentDao = new EnrollmentDao();
+    private EnrollmentRepository enrollmentRepository;
 
     private static final Student IVAN = Student.builder()
             .id(1)
@@ -54,9 +55,10 @@ class EnrollmentDaoTest {
 
     @Test
     void get() {
-        try(Session session = sessionFactory.openSession()) {
+        try(Session session = buildSession()) {
+            enrollmentRepository = new EnrollmentRepository(session);
             session.beginTransaction();
-            Optional<Enrollment> enrollment = enrollmentDao.get(session, ENROLLMENT.getId());
+            Optional<Enrollment> enrollment = enrollmentRepository.get(ENROLLMENT.getId());
             assertThat(enrollment).isPresent();
             assertThat(enrollment.get()).isEqualTo(ENROLLMENT);
             session.getTransaction().commit();
@@ -66,9 +68,10 @@ class EnrollmentDaoTest {
 
     @Test
     void getAll() {
-        try(Session session = sessionFactory.openSession()) {
+        try(Session session = buildSession()) {
+            enrollmentRepository = new EnrollmentRepository(session);
             session.beginTransaction();
-            List<Enrollment> enrollments = enrollmentDao.getAll(session);
+            List<Enrollment> enrollments = enrollmentRepository.getAll();
             assertThat(enrollments).hasSize(6);
             session.getTransaction().commit();
         }
@@ -76,18 +79,19 @@ class EnrollmentDaoTest {
 
     @Test
     void save() {
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            enrollmentRepository = new EnrollmentRepository(session);
             session.beginTransaction();
             Enrollment enrollment = Enrollment.builder()
                     .student(IVAN)
                     .course(MATH)
                     .build();
-            enrollmentDao.save(session,enrollment);
+            enrollmentRepository.save(enrollment);
 
             session.flush();
 
             enrollment.setId(7);
-            Optional<Enrollment> maybeEnrollment = enrollmentDao.get(session,enrollment.getId());
+            Optional<Enrollment> maybeEnrollment = enrollmentRepository.get(enrollment.getId());
             assertThat(maybeEnrollment).isPresent();
             assertThat(maybeEnrollment.get()).isEqualTo(enrollment);
             session.getTransaction().commit();
@@ -96,17 +100,18 @@ class EnrollmentDaoTest {
 
     @Test
     void testDefaultDate(){
-        try(Session session = sessionFactory.openSession()) {
+        try(Session session = buildSession()) {
+            enrollmentRepository = new EnrollmentRepository(session);
             session.beginTransaction();
             Enrollment enrollment = Enrollment.builder()
                     .student(IVAN)
                     .course(MATH)
                     .build();
-            enrollmentDao.save(session,enrollment);
+            enrollmentRepository.save(enrollment);
 
             session.flush();
 
-            Optional<Enrollment> enrollment1 = enrollmentDao.get(session, 7);
+            Optional<Enrollment> enrollment1 = enrollmentRepository.get(7);
             assertThat(enrollment1).isPresent();
             System.out.println(enrollment1.get());
             assertThat(enrollment1.get().getEnrollmentDate()).isNotNull();
@@ -117,7 +122,8 @@ class EnrollmentDaoTest {
 
     @Test
     void update() {
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            enrollmentRepository = new EnrollmentRepository(session);
             session.beginTransaction();
             Student alex = Student.builder()
                     .name("alex")
@@ -126,15 +132,15 @@ class EnrollmentDaoTest {
                     .grade(4.83f)
                     .build();
 
-            Optional<Enrollment> enrollment = enrollmentDao.get(session, ENROLLMENT.getId());
+            Optional<Enrollment> enrollment = enrollmentRepository.get(ENROLLMENT.getId());
 
             assertThat(enrollment).isPresent();
             enrollment.get().setStudent(alex);
             session.persist(alex);
-            enrollmentDao.update(session,enrollment.get());
+            enrollmentRepository.update(enrollment.get());
             session.flush();
 
-            Optional<Enrollment> updatedEnrollment = enrollmentDao.get(session,1);
+            Optional<Enrollment> updatedEnrollment = enrollmentRepository.get(1);
 
             assertThat(updatedEnrollment.get().getStudent()).isEqualTo(alex);
 
@@ -144,13 +150,14 @@ class EnrollmentDaoTest {
 
     @Test
     void delete() {
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
+            enrollmentRepository = new EnrollmentRepository(session);
             session.beginTransaction();
-            Optional<Enrollment> enrollment = enrollmentDao.get(session, ENROLLMENT.getId());
+            Optional<Enrollment> enrollment = enrollmentRepository.get(ENROLLMENT.getId());
             assertThat(enrollment).isPresent();
-            enrollmentDao.delete(session,enrollment.get());
+            enrollmentRepository.delete(enrollment.get());
             session.flush();
-            enrollment = enrollmentDao.get(session, ENROLLMENT.getId());
+            enrollment = enrollmentRepository.get(ENROLLMENT.getId());
             assertThat(enrollment).isEmpty();
 
             session. getTransaction().commit();
@@ -159,8 +166,13 @@ class EnrollmentDaoTest {
 
     @Test
     void giveStudentGradeForCourse(){
-        try(Session session = sessionFactory.openSession()){
+        try(Session session = buildSession()){
 
         }
+    }
+
+    private Session buildSession(){
+        return (Session) Proxy.newProxyInstance(SessionFactory.class.getClassLoader(),new Class[]{Session.class},
+                ((proxy, method, args) -> method.invoke(sessionFactory.getCurrentSession(),args)));
     }
 }

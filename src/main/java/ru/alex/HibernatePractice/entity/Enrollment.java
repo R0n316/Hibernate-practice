@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Builder
 @Entity
 @EqualsAndHashCode(exclude = "enrollmentDate")
-public class Enrollment {
+public class Enrollment implements BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

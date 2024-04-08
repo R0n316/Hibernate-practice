@@ -13,7 +13,7 @@ import java.util.List;
 @EqualsAndHashCode(of = "email")
 @Builder
 @Entity
-public class Student {
+public class Student implements BaseEntity<Integer> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
