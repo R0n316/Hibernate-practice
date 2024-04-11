@@ -17,7 +17,7 @@
 
   <dependencies>
 
-<!--    Test dependencies-->
+<!--    Testing-->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
@@ -44,9 +44,16 @@
       <version>1.19.7</version>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>junit-jupiter-params</artifactId>
+          <version>5.10.2</version>
+          <scope>test</scope>
+      </dependency>
 
 
-      <!--    Database dependencies-->
+
+      <!--    Database-->
 
     <dependency>
       <groupId>org.hibernate.orm</groupId>
@@ -60,7 +67,7 @@
       <version>42.7.3</version>
     </dependency>
 
-    <!--      Logging dependencies-->
+    <!--      Logging-->
     <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
@@ -90,6 +97,19 @@
           <groupId>org.mapstruct</groupId>
           <artifactId>mapstruct-processor</artifactId>
           <version>1.5.5.Final</version>
+      </dependency>
+
+<!--      Validation-->
+      <dependency>
+          <groupId>org.hibernate.validator</groupId>
+          <artifactId>hibernate-validator</artifactId>
+          <version>8.0.1.Final</version>
+      </dependency>
+
+      <dependency>
+          <groupId>org.glassfish</groupId>
+          <artifactId>jakarta.el</artifactId>
+          <version>4.0.2</version>
       </dependency>
 
 

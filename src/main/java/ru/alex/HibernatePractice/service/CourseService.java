@@ -1,5 +1,9 @@
 package ru.alex.HibernatePractice.service;
 
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import lombok.RequiredArgsConstructor;
 import ru.alex.HibernatePractice.dto.course.CourseUpdateDto;
 import ru.alex.HibernatePractice.entity.Course;
@@ -38,7 +42,15 @@ public class CourseService {
     }
 
     public void create(CourseCreateDto courseCreateDto){
-        courseRepository.save(courseCreateMapper.mapFrom(courseCreateDto));
+        try(ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()){
+            Validator validator = validatorFactory.getValidator();
+            Course course = courseCreateMapper.mapFrom(courseCreateDto);
+            var validationResult = validator.validate(course);
+            if(!validationResult.isEmpty()){
+                throw new ConstraintViolationException(validationResult);
+            }
+            courseRepository.save(course);
+        }
     }
     public Boolean update(Integer id, CourseUpdateDto updatedCourse){
         Optional<Course> courseOptional = courseRepository.get(id);
