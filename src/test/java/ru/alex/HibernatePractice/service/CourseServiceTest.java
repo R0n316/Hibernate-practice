@@ -5,12 +5,13 @@ import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import ru.alex.HibernatePractice.dto.CourseCreateDto;
-import ru.alex.HibernatePractice.dto.CourseReadDto;
-import ru.alex.HibernatePractice.entity.Course;
+import ru.alex.HibernatePractice.dto.course.CourseCreateDto;
+import ru.alex.HibernatePractice.dto.course.CourseReadDto;
+import ru.alex.HibernatePractice.dto.course.CourseUpdateDto;
 import ru.alex.HibernatePractice.mapper.courseMapper.CourseCreateMapper;
 import ru.alex.HibernatePractice.mapper.courseMapper.CourseMapper;
 import ru.alex.HibernatePractice.mapper.courseMapper.CourseReadMapper;
+import ru.alex.HibernatePractice.mapper.courseMapper.CourseUpdateMapper;
 import ru.alex.HibernatePractice.repository.CourseRepository;
 import ru.alex.HibernatePractice.util.HibernateTestUtil;
 import ru.alex.HibernatePractice.util.TestDataImporter;
@@ -116,9 +117,9 @@ class CourseServiceTest {
             assertThat(courseReadDtoOptional).isPresent();
 
             CourseReadDto courseReadDto = courseReadDtoOptional.get();
-            Course course = courseMapper.mapFrom(courseReadDto);
+            CourseUpdateDto course = courseMapper.mapFrom(courseReadDto);
             course.setName("new name");
-            courseService.update(course.getId(),course);
+            courseService.update(courseReadDto.getId(),course);
 //            session.merge(course);
             session.flush();
 
@@ -152,6 +153,7 @@ class CourseServiceTest {
         CourseRepository courseRepository = new CourseRepository(session);
         CourseReadMapper courseReadMapper = Mappers.getMapper(CourseReadMapper.class);
         CourseCreateMapper courseCreateMapper = Mappers.getMapper(CourseCreateMapper.class);
-        return new CourseService(courseRepository,courseReadMapper,courseCreateMapper);
+        CourseUpdateMapper courseUpdateMapper = Mappers.getMapper(CourseUpdateMapper.class);
+        return new CourseService(courseRepository,courseReadMapper,courseCreateMapper,courseUpdateMapper);
     }
 }

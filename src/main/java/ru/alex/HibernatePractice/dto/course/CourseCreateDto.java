@@ -1,6 +1,7 @@
-package ru.alex.HibernatePractice.dto;
+package ru.alex.HibernatePractice.dto.course;
 
 import lombok.*;
+import ru.alex.HibernatePractice.dto.Dto;
 
 @Builder
 //public record CourseCreateDto(

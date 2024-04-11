@@ -1,6 +1,7 @@
-package ru.alex.HibernatePractice.dto;
+package ru.alex.HibernatePractice.dto.course;
 
 import lombok.*;
+import ru.alex.HibernatePractice.dto.Dto;
 
 import java.util.List;
 
@@ -19,7 +20,7 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 @AllArgsConstructor
-public class CourseReadDto implements Dto{
+public class CourseReadDto implements Dto {
     private Integer id;
     private String name;
     private String description;

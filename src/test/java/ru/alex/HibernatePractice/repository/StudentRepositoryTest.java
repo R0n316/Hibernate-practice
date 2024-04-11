@@ -139,7 +139,7 @@ class StudentRepositoryTest {
 
             List<String> expectedEmails = List.of("ivan@gmail.com","jones@gmail.com");
 
-            List<Student> students = studentRepository.finStudentsByCourse(session,math.getId());
+            List<Student> students = studentRepository.findStudentsByCourse(session,math.getId());
 
             List<String> actualEmails = students.stream().map(Student::getEmail).toList();
 

@@ -13,7 +13,7 @@ public class StudentRepository extends BaseRepository<Student,Integer> {
         super(entityManager, Student.class);
     }
 
-    public List<Student> finStudentsByCourse(Session session, Integer courseId){
+    public List<Student> findStudentsByCourse(Session session, Integer courseId){
         return session.createQuery(
                         "SELECT DISTINCT s FROM Student s JOIN FETCH s.enrollments e WHERE e.course.id = :courseId", Student.class)
                 .setParameter("courseId", courseId)

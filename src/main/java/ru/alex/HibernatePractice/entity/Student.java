@@ -33,5 +33,4 @@ public class Student implements BaseEntity<Integer> {
     @OneToMany(mappedBy = "student",cascade = CascadeType.REMOVE)
     private List<Enrollment> enrollments;
 
-
 }
