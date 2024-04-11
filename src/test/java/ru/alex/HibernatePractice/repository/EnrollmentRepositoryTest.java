@@ -1,4 +1,4 @@
-package ru.alex.HibernatePractice.dao;
+package ru.alex.HibernatePractice.repository;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -137,7 +137,7 @@ class EnrollmentRepositoryTest {
             assertThat(enrollment).isPresent();
             enrollment.get().setStudent(alex);
             session.persist(alex);
-            enrollmentRepository.update(enrollment.get());
+            enrollmentRepository.update(null);
             session.flush();
 
             Optional<Enrollment> updatedEnrollment = enrollmentRepository.get(1);
@@ -155,7 +155,7 @@ class EnrollmentRepositoryTest {
             session.beginTransaction();
             Optional<Enrollment> enrollment = enrollmentRepository.get(ENROLLMENT.getId());
             assertThat(enrollment).isPresent();
-            enrollmentRepository.delete(enrollment.get());
+            enrollmentRepository.delete(null);
             session.flush();
             enrollment = enrollmentRepository.get(ENROLLMENT.getId());
             assertThat(enrollment).isEmpty();

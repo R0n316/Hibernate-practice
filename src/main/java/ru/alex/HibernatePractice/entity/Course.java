@@ -23,8 +23,6 @@ public class Course implements BaseEntity<Integer> {
 
     private Integer duration;
 
-
-
     @OneToMany(mappedBy = "course",cascade = CascadeType.REMOVE)
     private List<Enrollment> enrollments;
 }

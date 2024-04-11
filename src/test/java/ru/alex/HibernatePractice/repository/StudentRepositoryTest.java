@@ -1,4 +1,4 @@
-package ru.alex.HibernatePractice.dao;
+package ru.alex.HibernatePractice.repository;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -95,7 +95,7 @@ class StudentRepositoryTest {
             assertThat(maybeStudent).isPresent();
             Student student = maybeStudent.get();
             student.setEmail("newEmail@new.email");
-            studentRepository.update(student);
+            studentRepository.update(null);
             session.flush();
 
             Student updatedStudent = studentRepository.get(IVAN.getId()).get();
@@ -115,7 +115,7 @@ class StudentRepositoryTest {
             Optional<Student> student = studentRepository.get(IVAN.getId());
             assertThat(student).isPresent();
 
-            studentRepository.delete(student.get());
+            studentRepository.delete(null);
 
             Optional<Student> maybeStudent = studentRepository.get(IVAN.getId());
 

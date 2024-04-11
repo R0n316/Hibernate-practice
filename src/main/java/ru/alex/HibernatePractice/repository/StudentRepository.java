@@ -1,4 +1,4 @@
-package ru.alex.HibernatePractice.dao;
+package ru.alex.HibernatePractice.repository;
 
 import jakarta.persistence.EntityManager;
 import org.hibernate.Session;

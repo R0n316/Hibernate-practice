@@ -1,4 +1,4 @@
-package ru.alex.HibernatePractice.dao;
+package ru.alex.HibernatePractice.repository;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -106,7 +106,7 @@ class CourseRepositoryTest {
             assertThat(maybeCourse).isPresent();
             Course course = maybeCourse.get();
             course.setDuration(course.getDuration() + 10);
-            courseRepository.update(course);
+            courseRepository.update(null);
             session.flush();
             Course updatedCourse = courseRepository.get(course.getId()).get();
             assertThat(updatedCourse.getDuration()).isNotEqualTo(MATH.getDuration());
@@ -123,7 +123,7 @@ class CourseRepositoryTest {
 
             Optional<Course> course = courseRepository.get(MATH.getId());
             assertThat(course).isPresent();
-            courseRepository.delete(course.get());
+            courseRepository.delete(null);
 
             Optional<Course> maybeCourse = courseRepository.get(MATH.getId());
             assertThat(maybeCourse).isEmpty();

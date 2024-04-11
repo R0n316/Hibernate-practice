@@ -2,6 +2,7 @@ package ru.alex.HibernatePractice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
@@ -31,4 +32,6 @@ public class Enrollment implements BaseEntity<Integer> {
     @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "course_id",referencedColumnName = "id")
     private Course course;
+
+
 }

@@ -1,7 +1,9 @@
-package ru.alex.HibernatePractice.dao;
+package ru.alex.HibernatePractice.repository;
 
 import jakarta.persistence.EntityManager;
 import ru.alex.HibernatePractice.entity.Enrollment;
+
+import java.util.List;
 
 public class EnrollmentRepository extends BaseRepository<Enrollment,Integer> {
 
@@ -19,5 +21,19 @@ public class EnrollmentRepository extends BaseRepository<Enrollment,Integer> {
 
         enrollment.setCourseGrade(grade);
         entityManager.persist(enrollment);
+    }
+
+    public List<Enrollment> findEnrollmentsByCourse(Integer courseId){
+        return entityManager
+                .createQuery("SELECT e FROM Enrollment e WHERE e.course.id = :courseId",Enrollment.class)
+                .setParameter("courseId",courseId)
+                .getResultList();
+    }
+
+    public List<Enrollment> findEnrollmentsByStudent(Integer studentId){
+        return entityManager
+                .createQuery("SELECT e FROM Enrollment e WHERE e.student.id = :studentId",Enrollment.class)
+                .setParameter("studentId",studentId)
+                .getResultList();
     }
 }

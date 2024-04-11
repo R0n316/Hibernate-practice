@@ -1,4 +1,4 @@
-package ru.alex.HibernatePractice.dao;
+package ru.alex.HibernatePractice.repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public class BaseRepository<E extends BaseEntity<K>,K extends Serializable> implements Repository<E,K> {
+public abstract class BaseRepository<E extends BaseEntity<K>,K extends Serializable> implements Repository<E,K> {
 
     protected final EntityManager entityManager;
     private final Class<E> clazz;
