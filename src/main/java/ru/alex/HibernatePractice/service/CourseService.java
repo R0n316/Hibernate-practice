@@ -1,12 +1,16 @@
 package ru.alex.HibernatePractice.service;
 
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.Subgraph;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.graph.GraphSemantic;
 import ru.alex.HibernatePractice.dto.course.CourseUpdateDto;
 import ru.alex.HibernatePractice.entity.Course;
+import ru.alex.HibernatePractice.entity.Enrollment;
 import ru.alex.HibernatePractice.mapper.Mapper;
 import ru.alex.HibernatePractice.mapper.courseMapper.CourseCreateMapper;
 import ru.alex.HibernatePractice.mapper.courseMapper.CourseUpdateMapper;
@@ -16,6 +20,7 @@ import ru.alex.HibernatePractice.dto.course.CourseReadDto;
 import ru.alex.HibernatePractice.mapper.courseMapper.CourseReadMapper;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -27,9 +32,8 @@ public class CourseService {
     private final CourseUpdateMapper courseUpdateMapper;
 
     public <T> Optional<T> findById(Integer id, Mapper<Course,T> mapper){
-        Optional<Course> course = courseRepository.get(id);
+        Optional<Course> course = courseRepository.get(id,getEntityGraphReadProperties());
         return course.map(mapper::mapFrom);
-//        return courseRepository.get(id).map(mapper::mapFrom);
     }
 
 
@@ -38,7 +42,7 @@ public class CourseService {
     }
 
     public List<CourseReadDto> findAll(){
-        return courseRepository.getAll().stream().map(courseReadMapper::mapFrom).toList();
+        return courseRepository.getAll(getEntityGraphReadProperties()).stream().map(courseReadMapper::mapFrom).toList();
     }
 
     public void create(CourseCreateDto courseCreateDto){
@@ -55,8 +59,6 @@ public class CourseService {
             courseRepository.update(course);
         });
         return courseOptional.isPresent();
-        // TODO проверить существует ли этот объект, и если существует, то обновить его
-        // TODO проверить, делается ли повторный запрос на получение объекта при удалении
     }
 
     public Boolean delete(Integer id){
@@ -73,5 +75,16 @@ public class CourseService {
                 throw new ConstraintViolationException(validationResult);
             }
         }
+    }
+
+    public Map<String,Object> getEntityGraphReadProperties(){
+        EntityGraph<Course> entityGraph = courseRepository.getEntityManager().createEntityGraph(Course.class);
+        entityGraph.addAttributeNodes("enrollments");
+        Subgraph<Enrollment> enrollments = entityGraph.addSubgraph("enrollments", Enrollment.class);
+        enrollments.addAttributeNodes("student");
+        return Map.of(
+                GraphSemantic.LOAD.getJakartaHintName(),
+                entityGraph
+        );
     }
 }

@@ -73,7 +73,7 @@ class CourseServiceTest {
                 .students(List.of(1,2))
                 .build();
 
-        List<CourseReadDto> expectedDtos = List.of(MATH_DTO,physicsDto,historyDto);
+        List<CourseReadDto> expectedDtos = List.of(MATH_DTO,historyDto,physicsDto);
         List<CourseReadDto> actualDtos = courseService.findAll();
         assertThat(actualDtos).hasSize(expectedDtos.size());
         assertThat(actualDtos).isEqualTo(expectedDtos);
@@ -105,7 +105,6 @@ class CourseServiceTest {
         CourseUpdateDto course = courseMapper.mapFrom(courseReadDto);
         course.setName("new name");
         courseService.update(courseReadDto.getId(),course);
-//            session.merge(course);
         session.flush();
 
         Optional<CourseReadDto> courseReadDtoOptional1 = courseService.findById(1);

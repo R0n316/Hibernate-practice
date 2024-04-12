@@ -30,6 +30,6 @@ public class Course implements BaseEntity<Integer> {
     @Min(value = 10, message = "course duration should be greater or equals the 10 hours")
     private Integer duration;
 
-    @OneToMany(mappedBy = "course",cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "course")
     private List<Enrollment> enrollments;
 }
