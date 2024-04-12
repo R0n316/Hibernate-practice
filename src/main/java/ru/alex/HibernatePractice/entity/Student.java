@@ -23,12 +23,12 @@ public class Student implements BaseEntity<Integer> {
 
     private Integer id;
 
-    @NotNull(message = "name should not be null")
-    @Length(max = 32, message = "name length should be lowest or equals then 32")
+    @NotNull
+    @Length(max = 32, message = "length should be lowest or equals then 32")
     private String name;
 
-    @NotNull(message = "surname should not be null")
-    @Length(max = 32, message = "surname length should be lowest or equals then 32")
+    @NotNull
+    @Length(max = 32, message = "length should be lowest or equals then 32")
     private String surname;
 
     @Email(message = "email is not valid")
@@ -38,7 +38,8 @@ public class Student implements BaseEntity<Integer> {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Min(value = 0, message = "grade should be greater or equals then 0")
+    @NotNull
+    @Min(value = 1, message = "grade should be greater or equals then 1")
     private Float grade;
 
     @OneToMany(mappedBy = "student",cascade = CascadeType.REMOVE)

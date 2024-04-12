@@ -1,5 +1,9 @@
 package ru.alex.HibernatePractice.service;
 
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import lombok.RequiredArgsConstructor;
 import ru.alex.HibernatePractice.dto.student.StudentCreateDto;
 import ru.alex.HibernatePractice.dto.student.StudentReadDto;
@@ -30,7 +34,9 @@ public class StudentService {
     }
 
     public void create(StudentCreateDto studentCreateDto){
-        studentRepository.save(studentCreateMapper.mapFrom(studentCreateDto));
+        Student student = studentCreateMapper.mapFrom(studentCreateDto);
+        validateStudent(student);
+        studentRepository.save(student);
     }
 
     public Boolean update(Integer id, StudentUpdateDto studentUpdateDto){
@@ -38,6 +44,7 @@ public class StudentService {
         studentOptional.ifPresent(it -> {
             Student student = studentUpdateMapper.mapFrom(studentUpdateDto);
             student.setId(id);
+            validateStudent(student);
             studentRepository.update(student);
         });
         return studentOptional.isPresent();
@@ -47,5 +54,15 @@ public class StudentService {
         Optional<Student> student = studentRepository.get(id);
         student.ifPresent(studentRepository::delete);
         return student.isPresent();
+    }
+
+    void validateStudent(Student student){
+        try(ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()){
+            Validator validator = validatorFactory.getValidator();
+            var validationResult = validator.validate(student);
+            if(!validationResult.isEmpty()){
+                throw new ConstraintViolationException(validationResult);
+            }
+        }
     }
 }

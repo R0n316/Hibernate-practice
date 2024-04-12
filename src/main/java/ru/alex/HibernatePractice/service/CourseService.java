@@ -42,21 +42,16 @@ public class CourseService {
     }
 
     public void create(CourseCreateDto courseCreateDto){
-        try(ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()){
-            Validator validator = validatorFactory.getValidator();
-            Course course = courseCreateMapper.mapFrom(courseCreateDto);
-            var validationResult = validator.validate(course);
-            if(!validationResult.isEmpty()){
-                throw new ConstraintViolationException(validationResult);
-            }
-            courseRepository.save(course);
-        }
+        Course course = courseCreateMapper.mapFrom(courseCreateDto);
+        validateCourse(course);
+        courseRepository.save(course);
     }
     public Boolean update(Integer id, CourseUpdateDto updatedCourse){
         Optional<Course> courseOptional = courseRepository.get(id);
         courseOptional.ifPresent(it -> {
             Course course = courseUpdateMapper.mapFrom(updatedCourse);
             course.setId(id);
+            validateCourse(course);
             courseRepository.update(course);
         });
         return courseOptional.isPresent();
@@ -68,5 +63,15 @@ public class CourseService {
         Optional<Course> courseOptional = courseRepository.get(id);
         courseOptional.ifPresent(courseRepository::delete);
         return courseOptional.isPresent();
+    }
+
+    void validateCourse(Course course){
+        try(ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory()) {
+            Validator validator = validatorFactory.getValidator();
+            var validationResult = validator.validate(course);
+            if (!validationResult.isEmpty()) {
+                throw new ConstraintViolationException(validationResult);
+            }
+        }
     }
 }

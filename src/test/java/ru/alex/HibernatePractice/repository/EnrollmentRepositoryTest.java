@@ -2,6 +2,7 @@ package ru.alex.HibernatePractice.repository;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -11,7 +12,6 @@ import ru.alex.HibernatePractice.entity.Student;
 import ru.alex.HibernatePractice.util.TestDataImporter;
 import ru.alex.HibernatePractice.util.HibernateTestUtil;
 
-import java.lang.reflect.Proxy;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +25,8 @@ class EnrollmentRepositoryTest {
     private SessionFactory sessionFactory;
 
     private EnrollmentRepository enrollmentRepository;
+
+    private Session session;
 
     private static final Student IVAN = Student.builder()
             .id(1)
@@ -51,37 +53,27 @@ class EnrollmentRepositoryTest {
     void setUp() {
         sessionFactory = HibernateTestUtil.buildSessionFactory();
         TestDataImporter.initData(sessionFactory);
+        session = sessionFactory.openSession();
+        enrollmentRepository = new EnrollmentRepository(session);
+        session.beginTransaction();
     }
 
     @Test
     void get() {
-        try(Session session = buildSession()) {
-            enrollmentRepository = new EnrollmentRepository(session);
-            session.beginTransaction();
             Optional<Enrollment> enrollment = enrollmentRepository.get(ENROLLMENT.getId());
             assertThat(enrollment).isPresent();
             assertThat(enrollment.get()).isEqualTo(ENROLLMENT);
-            session.getTransaction().commit();
-        }
     }
 
 
     @Test
     void getAll() {
-        try(Session session = buildSession()) {
-            enrollmentRepository = new EnrollmentRepository(session);
-            session.beginTransaction();
             List<Enrollment> enrollments = enrollmentRepository.getAll();
             assertThat(enrollments).hasSize(6);
-            session.getTransaction().commit();
-        }
     }
 
     @Test
     void save() {
-        try(Session session = buildSession()){
-            enrollmentRepository = new EnrollmentRepository(session);
-            session.beginTransaction();
             Enrollment enrollment = Enrollment.builder()
                     .student(IVAN)
                     .course(MATH)
@@ -94,15 +86,10 @@ class EnrollmentRepositoryTest {
             Optional<Enrollment> maybeEnrollment = enrollmentRepository.get(enrollment.getId());
             assertThat(maybeEnrollment).isPresent();
             assertThat(maybeEnrollment.get()).isEqualTo(enrollment);
-            session.getTransaction().commit();
-        }
     }
 
     @Test
     void testDefaultDate(){
-        try(Session session = buildSession()) {
-            enrollmentRepository = new EnrollmentRepository(session);
-            session.beginTransaction();
             Enrollment enrollment = Enrollment.builder()
                     .student(IVAN)
                     .course(MATH)
@@ -116,15 +103,10 @@ class EnrollmentRepositoryTest {
             System.out.println(enrollment1.get());
             assertThat(enrollment1.get().getEnrollmentDate()).isNotNull();
             System.out.println(enrollment1.get().getEnrollmentDate());
-            session.getTransaction().commit();
-        }
     }
 
     @Test
     void update() {
-        try(Session session = buildSession()){
-            enrollmentRepository = new EnrollmentRepository(session);
-            session.beginTransaction();
             Student alex = Student.builder()
                     .name("alex")
                     .surname("rav")
@@ -137,42 +119,33 @@ class EnrollmentRepositoryTest {
             assertThat(enrollment).isPresent();
             enrollment.get().setStudent(alex);
             session.persist(alex);
-            enrollmentRepository.update(null);
+            enrollmentRepository.update(enrollment.get());
             session.flush();
 
             Optional<Enrollment> updatedEnrollment = enrollmentRepository.get(1);
 
             assertThat(updatedEnrollment.get().getStudent()).isEqualTo(alex);
-
-            session.getTransaction().commit();
-        }
     }
 
     @Test
     void delete() {
-        try(Session session = buildSession()){
-            enrollmentRepository = new EnrollmentRepository(session);
-            session.beginTransaction();
             Optional<Enrollment> enrollment = enrollmentRepository.get(ENROLLMENT.getId());
             assertThat(enrollment).isPresent();
-            enrollmentRepository.delete(null);
+            enrollmentRepository.delete(enrollment.get());
             session.flush();
             enrollment = enrollmentRepository.get(ENROLLMENT.getId());
             assertThat(enrollment).isEmpty();
-
-            session. getTransaction().commit();
-        }
     }
 
     @Test
     void giveStudentGradeForCourse(){
-        try(Session session = buildSession()){
 
-        }
     }
 
-    private Session buildSession(){
-        return (Session) Proxy.newProxyInstance(SessionFactory.class.getClassLoader(),new Class[]{Session.class},
-                ((proxy, method, args) -> method.invoke(sessionFactory.getCurrentSession(),args)));
+    @AfterEach
+    void closeResources(){
+        session.getTransaction().commit();
+        sessionFactory.close();
+        session.close();
     }
 }

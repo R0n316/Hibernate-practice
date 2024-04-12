@@ -1,7 +1,6 @@
 package ru.alex.HibernatePractice.service;
 
 import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.ValidationException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.jupiter.api.AfterEach;
@@ -133,12 +132,12 @@ class CourseServiceTest {
                 .name(name)
                 .duration(15)
                 .build();
-            var constraintViolationException = Assertions.assertThrows(
-                    ConstraintViolationException.class,
-                    () -> courseService.create(courseCreateDto)
-            );
-            assertThat(constraintViolationException.getMessage())
-                    .isEqualTo(exceptionMessage);
+        var constraintViolationException = Assertions.assertThrows(
+                ConstraintViolationException.class,
+                () -> courseService.create(courseCreateDto)
+        );
+        assertThat(constraintViolationException.getMessage())
+                .isEqualTo(exceptionMessage);
     }
 
     static Stream<Arguments> getArgumentsForNameValidationTest(){
@@ -148,7 +147,7 @@ class CourseServiceTest {
                         "qwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqwqw",
                         "name: name should be lowest or equals then 64 symbols"
                 ),
-                Arguments.of(null,"name: name should not be null")
+                Arguments.of(null,"name: " + getDefaultNullConstraintMessage())
         );
     }
 
@@ -174,9 +173,13 @@ class CourseServiceTest {
                         "duration: course duration should be greater or equals the 10 hours"
                 ),
                 Arguments.of(
-                        null, "duration: duration should not be null"
+                        null, "duration: " + getDefaultNullConstraintMessage()
                 )
         );
+    }
+
+    static String getDefaultNullConstraintMessage(){
+        return "не должно равняться null";
     }
 
     @AfterEach

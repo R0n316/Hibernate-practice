@@ -20,13 +20,13 @@ public class Course implements BaseEntity<Integer> {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotNull(message = "name should not be null")
+    @NotNull
     @Length(max = 64, message = "name should be lowest or equals then 64 symbols")
     private String name;
 
     private String description;
 
-    @NotNull(message = "duration should not be null")
+    @NotNull
     @Min(value = 10, message = "course duration should be greater or equals the 10 hours")
     private Integer duration;
 

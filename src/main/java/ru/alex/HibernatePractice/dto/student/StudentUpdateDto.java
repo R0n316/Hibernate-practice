@@ -14,4 +14,5 @@ public class StudentUpdateDto {
     private String surname;
     private String email;
     private LocalDate birthDate;
+    private Float grade;
 }
