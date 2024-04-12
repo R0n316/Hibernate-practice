@@ -19,4 +19,12 @@ public class StudentRepository extends BaseRepository<Student,Integer> {
                 .setParameter("courseId", courseId)
                 .list();
     }
+
+    @Override
+    public void delete(Student entity) {
+        entityManager.createQuery("DELETE FROM Enrollment e WHERE e.student = :student")
+                .setParameter("student",entity)
+                .executeUpdate();
+        super.delete(entity);
+    }
 }

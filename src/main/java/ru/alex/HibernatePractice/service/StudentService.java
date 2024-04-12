@@ -1,10 +1,13 @@
 package ru.alex.HibernatePractice.service;
 
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.Subgraph;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.graph.GraphSemantic;
 import ru.alex.HibernatePractice.dto.student.StudentCreateDto;
 import ru.alex.HibernatePractice.dto.student.StudentReadDto;
 import ru.alex.HibernatePractice.dto.student.StudentUpdateDto;
@@ -15,6 +18,7 @@ import ru.alex.HibernatePractice.mapper.studentMapper.StudentUpdateMapper;
 import ru.alex.HibernatePractice.repository.StudentRepository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -26,11 +30,11 @@ public class StudentService {
     private final StudentUpdateMapper studentUpdateMapper;
 
     public Optional<StudentReadDto> findById(Integer id){
-        return studentRepository.get(id).map(studentReadMapper::mapFrom);
+        return studentRepository.get(id, getEntityGraphReadProperties()).map(studentReadMapper::mapFrom);
     }
 
     public List<StudentReadDto> findAll(){
-        return studentRepository.getAll().stream().map(studentReadMapper::mapFrom).toList();
+        return studentRepository.getAll(getEntityGraphReadProperties()).stream().map(studentReadMapper::mapFrom).toList();
     }
 
     public void create(StudentCreateDto studentCreateDto){
@@ -64,5 +68,16 @@ public class StudentService {
                 throw new ConstraintViolationException(validationResult);
             }
         }
+    }
+
+    private Map<String, Object> getEntityGraphReadProperties(){
+        EntityGraph<Student> entityGraph = studentRepository.getEntityManager().createEntityGraph(Student.class);
+        entityGraph.addAttributeNodes("enrollments");
+        Subgraph<Object> enrollments = entityGraph.addSubgraph("enrollments");
+        enrollments.addAttributeNodes("course");
+        return Map.of(
+                GraphSemantic.FETCH.getJakartaHintName(),
+                entityGraph
+        );
     }
 }

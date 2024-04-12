@@ -5,9 +5,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -42,7 +44,9 @@ public class Student implements BaseEntity<Integer> {
     @Min(value = 1, message = "grade should be greater or equals then 1")
     private Float grade;
 
-    @OneToMany(mappedBy = "student",cascade = CascadeType.REMOVE)
-    private List<Enrollment> enrollments;
+    @OneToMany(mappedBy = "student")
+    @BatchSize(size = 50)
+    @Builder.Default
+    private List<Enrollment> enrollments = new ArrayList<>();
 
 }

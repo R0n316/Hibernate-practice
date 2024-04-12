@@ -57,7 +57,6 @@ class StudentServiceTest {
     @Test
     void findById() {
         Optional<StudentReadDto> studentReadDto = studentService.findById(IVAN.getId());
-
         assertThat(studentReadDto).isPresent();
         assertThat(studentReadDto.get()).isEqualTo(IVAN);
     }
